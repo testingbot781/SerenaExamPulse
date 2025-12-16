@@ -1,18 +1,29 @@
 from pyrogram import filters
 from bot.config import ADMIN_ID
-from bot.database import db
+from bot.database import users, blocked
 
 def register(app):
 
-    @app.on_message(filters.command("status") & filters.user(ADMIN_ID))
+    # 🔥 Command: /status (Admin Only)
+    @app.on_message(filters.command("status") & filters.user(int(ADMIN_ID)))
     async def status(_, m):
-        total = db.execute("SELECT COUNT(*) FROM users").fetchone()[0]
-        blocked = db.execute("SELECT COUNT(*) FROM blocked").fetchone()[0]
-        await m.reply(f"📊 **Bot Status**\n\n👥 Total Users: {total}\n🚫 Blocked: {blocked}")
+        total_users = users.count_documents({})
+        blocked_users = blocked.count_documents({})
+        
+        await m.reply(
+            f"📊 **Bot Status**\n\n"
+            f"👥 Total Users: {total_users}\n"
+            f"🚫 Blocked Users: {blocked_users}\n"
+        )
 
-    @app.on_message(filters.command("users") & filters.user(ADMIN_ID))
-    async def users(_, m):
-        users = db.execute("SELECT user_id FROM users").fetchall()
+    # 🔥 Command: /users (Admin Only)
+    @app.on_message(filters.command("users") & filters.user(int(ADMIN_ID)))
+    async def show_users(_, m):
+
+        all_users = users.find({})
         msg = "👤 **Registered Users:**\n\n"
-        msg += "\n".join([str(u[0]) for u in users])
-        await m.reply(msg)
+
+        for u in all_users:
+            msg += f"• {u.get('name', 'Unknown')} (ID: {u['user_id']})\n"
+
+        await m.reply(msg or "No users found.")

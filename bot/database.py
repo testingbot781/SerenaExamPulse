@@ -1,25 +1,12 @@
-import sqlite3
+from pymongo import MongoClient
+import os
 
-conn = sqlite3.connect("data.db", check_same_thread=False)
-db = conn.cursor()
+MONGO_URL = os.getenv("MONGO_URL")
 
-db.execute("""
-CREATE TABLE IF NOT EXISTS users (
-    user_id INTEGER PRIMARY KEY,
-    name TEXT,
-    state TEXT,
-    dob TEXT,
-    gender TEXT,
-    category TEXT,
-    qualifications TEXT,
-    preferences TEXT
-)
-""")
+client = MongoClient(MONGO_URL)
 
-db.execute("""
-CREATE TABLE IF NOT EXISTS blocked (
-    user_id INTEGER PRIMARY KEY
-)
-""")
+db = client["serena_exam_pulse"]
 
-conn.commit()
+users = db["users"]       # user profiles
+blocked = db["blocked"]   # block tracking
+exams = db["exams"]       # admin exam postings

@@ -40,18 +40,19 @@ admin.register(app)
 async def main_bot():
     await app.start()
     print("Bot started successfully ✔")
-    
+
     init_scheduler(app)
     print("Scheduler started ✔")
 
-    # Bot ko idle rakhna (Render ke liye best)
-    await asyncio.Event().wait()   # ← loop alive forever
+    # Keep bot alive forever (no stop, no idle)
+    while True:
+        await asyncio.sleep(60)
 
 
 if __name__ == "__main__":
-    # Flask ko background thread me chalao
+    # Run Flask in background thread
     Thread(target=run_flask, daemon=True).start()
 
-    # Async bot start
+    # Run bot in main thread / main loop
     asyncio.run(main_bot())
 

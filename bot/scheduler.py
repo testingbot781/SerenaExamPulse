@@ -1,29 +1,36 @@
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from bot.database import db, conn
-import json
 from bot.logic.eligibility import check_user_eligibility
+from bot.database import users
+from bot.ui.keyboards import exam_apply_button
+import json
 
 scheduler = AsyncIOScheduler()
 
-def start_scheduler(app):
-    @scheduler.scheduled_job("interval", minutes=60)
+def init_scheduler(app):
+    @scheduler.scheduled_job("interval", hours=1)
     async def send_alerts():
         exams = json.load(open("bot/data/exams.json"))
-        db_users = db.execute("SELECT * FROM users").fetchall()
+        all_users = list(users.find({}))
 
-        for user in db_users:
-            user_id = user[0]
+        for user in all_users:
+            user_id = user["user_id"]
+
             for exam in exams:
                 if check_user_eligibility(user, exam):
                     await app.send_message(
                         user_id,
-                        f"📢 New Exam Alert!\n\n"
-                        f"📝 {exam['name']}\n"
-                        f"💰 Salary: {exam['salary']}\n"
-                        f"🎓 Qualification: {exam['qualification']}\n"
-                        f"🎂 Age Limit: {exam['age_min']} - {exam['age_max']}\n\n"
-                        "👇 Apply below",
+                        f"📢 **New Exam Opportunity!**\n\n"
+                        f"📝 **Exam:** {exam['name']}\n"
+                        f"💰 **Salary:** {exam['salary']}\n"
+                        f"🎓 **Qualification:** {', '.join(exam['qualification'])}\n"
+                        f"🎂 **Age Limit:** {exam['age_min']} - {exam['age_max']}\n"
+                        f"🗂️ **States:** {', '.join(exam['states'])}\n\n"
+                        f"👇 Apply from the button below",
                         reply_markup=exam_apply_button(exam["apply_link"])
                     )
 
-    scheduler.start()
+    # IMPORTANT: Scheduler ko Pyrogram event loop ke andar start karna hota hai
+    app.add_handler(
+        app.on_startup(lambda: scheduler.start())
+    )
+    

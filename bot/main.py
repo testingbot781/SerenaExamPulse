@@ -1,67 +1,43 @@
-from threading import Thread
-import asyncio
+import subprocess
 from flask import Flask
-from pyrogram import Client
-from bot.config import BOT_TOKEN, API_ID, API_HASH
-from bot.handlers import start, help, settings, profile, admin
-from bot.scheduler import init_scheduler
+from threading import Thread
 
+# -----------------------------
+# Flask server for Render
+# -----------------------------
+app_flask = Flask(__name__)
 
-# -----------------------------------
-# Flask server (Render requirement)
-# -----------------------------------
-flask_app = Flask(__name__)
-
-@flask_app.route("/")
+@app_flask.route("/")
 def home():
-    return "Serena Exam Pulse bot is running!"
+    return "Serena Exam Pulse is running (Web Service Mode)."
 
 def run_flask():
-    flask_app.run(host="0.0.0.0", port=10000)
+    app_flask.run(host="0.0.0.0", port=10000)
 
 
-# -----------------------------------
-# Telegram Bot (Pyrogram)
-# -----------------------------------
-app = Client(
-    "SerenaExamPulse",
-    bot_token=BOT_TOKEN,
-    api_id=API_ID,
-    api_hash=API_HASH
-)
-
-start.register(app)
-help.register(app)
-settings.register(app)
-profile.register(app)
-admin.register(app)
+# -----------------------------
+# Pyrogram bot as SUBPROCESS
+# -----------------------------
+def run_pyrogram():
+    # This will start your bot in a SEPARATE OS PROCESS
+    subprocess.Popen(
+        ["python", "-m", "bot.worker"],  # worker.py file will run Pyrogram bot
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE
+    )
 
 
-async def bot_loop():
-    await app.start()
-    print("🔥 Bot started successfully!")
-    init_scheduler(app)
-    print("⏳ Scheduler started!")
-
-    # Keep bot alive forever WITHOUT idle(), WITHOUT signals
-    while True:
-        await asyncio.sleep(3)
-
-
-def run_bot():
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    loop.run_until_complete(bot_loop())
-
-
-# -----------------------------------
-# Start Both Services
-# -----------------------------------
+# -----------------------------
+# Start both services
+# -----------------------------
 if __name__ == "__main__":
+    # Start Flask (Render requirement)
     Thread(target=run_flask, daemon=True).start()
-    Thread(target=run_bot, daemon=True).start()
 
-    # Prevent main thread from exiting
+    # Start Pyrogram bot (Separate process — very important)
+    Thread(target=run_pyrogram, daemon=True).start()
+
+    # Keep main process alive forever
     while True:
         pass
 

@@ -1,7 +1,8 @@
 import os
 
-BOT_TOKEN = your_token
-API_ID = your_value
-API_HASH = your_hash
-ADMIN_ID = your_telegram_id
-MONGO_URL = mongodb+srv://username:password@cluster.mongodb.net/
+API_ID = int(os.environ["API_ID"])
+API_HASH = os.environ["API_HASH"]
+BOT_TOKEN = os.environ["BOT_TOKEN"]
+MONGO_URL = os.environ["MONGO_URL"]
+
+OWNER_IDS = {1598576202, 6518065496}

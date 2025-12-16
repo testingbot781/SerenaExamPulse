@@ -1,7 +1,7 @@
 from pyrogram import Client
 from bot.config import BOT_TOKEN, API_ID, API_HASH
 from bot.handlers import start, help, settings, profile, admin
-from bot.scheduler import start_scheduler
+from bot.scheduler import init_scheduler
 
 app = Client(
     "SerenaExamPulse",
@@ -16,6 +16,6 @@ settings.register(app)
 profile.register(app)
 admin.register(app)
 
-start_scheduler(app)
+init_scheduler(app)
 
 app.run()

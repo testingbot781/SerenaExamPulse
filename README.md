@@ -1,3 +1,26 @@
+# 🌸 Serena Exam Pulse
+
+A smart Telegram bot that sends government exam alerts based on the user's profile and eligibility.
+
+## Features
+- Eligibility-based exam filtering
+- Inline Apply Now buttons
+- Multi-degree support
+- Admin dashboard (/status /users)
+- Aesthetic UI
+
+## Deployment
+1. Upload code to GitHub
+2. Create a Web Service on Render
+3. Add env variables:
+   BOT_TOKEN=
+   API_ID=
+   API_HASH=
+   ADMIN_ID=
+4. Start command:
+   python -m bot.main
+
+
 # Serena Exam Pulse 🌸
 
 A Telegram bot that notifies users about government exams

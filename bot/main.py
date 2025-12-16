@@ -1,15 +1,15 @@
 from threading import Thread
 import asyncio
 from flask import Flask
-from pyrogram import Client, idle
+from pyrogram import Client
 from bot.config import BOT_TOKEN, API_ID, API_HASH
 from bot.handlers import start, help, settings, profile, admin
 from bot.scheduler import init_scheduler
 
 
-# -----------------------------
-# Flask server
-# -----------------------------
+# -----------------------------------
+# Flask server (Render requirement)
+# -----------------------------------
 flask_app = Flask(__name__)
 
 @flask_app.route("/")
@@ -20,9 +20,9 @@ def run_flask():
     flask_app.run(host="0.0.0.0", port=10000)
 
 
-# -----------------------------
-# Pyrogram Bot
-# -----------------------------
+# -----------------------------------
+# Telegram Bot (Pyrogram)
+# -----------------------------------
 app = Client(
     "SerenaExamPulse",
     bot_token=BOT_TOKEN,
@@ -37,31 +37,31 @@ profile.register(app)
 admin.register(app)
 
 
-async def start_bot():
+async def bot_loop():
     await app.start()
     print("🔥 Bot started successfully!")
-
     init_scheduler(app)
     print("⏳ Scheduler started!")
 
-    await idle()  # Pyrogram का built‑in stable loop
+    # Keep bot alive forever WITHOUT idle(), WITHOUT signals
+    while True:
+        await asyncio.sleep(3)
 
 
 def run_bot():
-    asyncio.run(start_bot())
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    loop.run_until_complete(bot_loop())
 
 
-# -----------------------------
+# -----------------------------------
 # Start Both Services
-# -----------------------------
+# -----------------------------------
 if __name__ == "__main__":
-    # Run Flask (Render wants open port)
     Thread(target=run_flask, daemon=True).start()
-
-    # Run Telegram Bot in background
     Thread(target=run_bot, daemon=True).start()
 
-    # Keep main thread alive
+    # Prevent main thread from exiting
     while True:
         pass
 

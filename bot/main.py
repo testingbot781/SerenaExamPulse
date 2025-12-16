@@ -1,4 +1,5 @@
-from pyrogram import Client
+import asyncio
+from pyrogram import Client, idle
 from bot.config import BOT_TOKEN, API_ID, API_HASH
 from bot.handlers import start, help, settings, profile, admin
 from bot.scheduler import init_scheduler
@@ -17,9 +18,12 @@ settings.register(app)
 profile.register(app)
 admin.register(app)
 
-# Start scheduler AFTER the app starts
-@app.on_event("start")
-async def on_start(_, __):
-    init_scheduler(app)
+async def main():
+    await app.start()          # Pyrogram start
+    init_scheduler(app)         # Scheduler start (SAFE)
+    print("Bot & Scheduler Started Successfully")
+    await idle()                # Keep running
+    await app.stop()
 
-app.run()
+if __name__ == "__main__":
+    asyncio.run(main())

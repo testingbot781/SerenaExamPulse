@@ -1,8 +1,7 @@
 import os
 
-BOT_TOKEN = os.getenv("BOT_TOKEN")
-API_ID = int(os.getenv("API_ID"))
-API_HASH = os.getenv("API_HASH")
-
-ADMIN_ID = int(os.getenv("ADMIN_ID"))   # Owner ID (you)
-DB_PATH = "data.db"
+BOT_TOKEN = your_token
+API_ID = your_value
+API_HASH = your_hash
+ADMIN_ID = your_telegram_id
+MONGO_URL = mongodb+srv://username:password@cluster.mongodb.net/

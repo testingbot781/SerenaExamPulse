@@ -10,12 +10,16 @@ app = Client(
     api_hash=API_HASH
 )
 
+# Register Handlers
 start.register(app)
 help.register(app)
 settings.register(app)
 profile.register(app)
 admin.register(app)
 
-init_scheduler(app)
+# Start scheduler AFTER the app starts
+@app.on_event("start")
+async def on_start(_, __):
+    init_scheduler(app)
 
 app.run()

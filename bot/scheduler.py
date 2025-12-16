@@ -3,34 +3,33 @@ from bot.logic.eligibility import check_user_eligibility
 from bot.database import users
 from bot.ui.keyboards import exam_apply_button
 import json
+import asyncio
 
 scheduler = AsyncIOScheduler()
 
-def init_scheduler(app):
-    @scheduler.scheduled_job("interval", hours=1)
-    async def send_alerts():
-        exams = json.load(open("bot/data/exams.json"))
-        all_users = list(users.find({}))
+async def run_scheduler(app):
+    exams = json.load(open("bot/data/exams.json"))
+    all_users = list(users.find({}))
 
-        for user in all_users:
-            user_id = user["user_id"]
+    for user in all_users:
+        user_id = user["user_id"]
 
-            for exam in exams:
-                if check_user_eligibility(user, exam):
-                    await app.send_message(
-                        user_id,
+        for exam in exams:
+            if check_user_eligibility(user, exam):
+                await app.send_message(
+                    user_id,
+                    (
                         f"📢 **New Exam Opportunity!**\n\n"
                         f"📝 **Exam:** {exam['name']}\n"
                         f"💰 **Salary:** {exam['salary']}\n"
                         f"🎓 **Qualification:** {', '.join(exam['qualification'])}\n"
                         f"🎂 **Age Limit:** {exam['age_min']} - {exam['age_max']}\n"
-                        f"🗂️ **States:** {', '.join(exam['states'])}\n\n"
-                        f"👇 Apply from the button below",
-                        reply_markup=exam_apply_button(exam["apply_link"])
-                    )
+                        f"📍 **States:** {', '.join(exam['states'])}\n\n"
+                        "👇 Apply below"
+                    ),
+                    reply_markup=exam_apply_button(exam["apply_link"])
+                )
 
-    # IMPORTANT: Scheduler ko Pyrogram event loop ke andar start karna hota hai
-    app.add_handler(
-        app.on_startup(lambda: scheduler.start())
-    )
-    
+def init_scheduler(app):
+    scheduler.add_job(run_scheduler, "interval", hours=1, args=[app])
+    scheduler.start()

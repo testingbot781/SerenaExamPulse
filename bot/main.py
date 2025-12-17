@@ -2,12 +2,13 @@ def run_pyrogram():
     import sys
     import os
 
-    # absolute path to project root
+    print(">>> Starting Pyrogram subprocess...")
+
     project_root = os.path.dirname(os.path.abspath(__file__))
     
     subprocess.Popen(
         [
-            sys.executable,     # ALWAYS RUN CORRECT PYTHON
+            sys.executable,
             "-m",
             "bot.worker"
         ],
@@ -16,3 +17,4 @@ def run_pyrogram():
         stderr=subprocess.PIPE
     )
 
+    print(">>> Pyrogram subprocess launched ✔")
